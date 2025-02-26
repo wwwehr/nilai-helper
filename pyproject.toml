@@ -9,7 +9,6 @@ package-mode = false
 [tool.poetry.dependencies]
 python = "^3.10"
 python-dotenv = "^1.0.1"
-cdp-langchain = { path = "../../python", develop = true }
 cdp-langchain = {git = "https://github.com/wwwehr/agentkit.git", branch = "nillion-secretvault"}
 
 bip-utils = "^2.9.3"
