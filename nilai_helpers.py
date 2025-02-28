@@ -149,25 +149,13 @@ def run_reactive_completion(
 def invoke_with_secret_vault_and_save(
     model_role: str, schema_uuid: str, task: str, query_filter: dict = {}
 ):
-    # Send POST request directly to nilai endpoint
-    chat_completions_url = os.environ["NILLION_NILAI_HOST"] + "/chat/completions"
-    tester = requests.post(
-        chat_completions_url,
-        headers={
-            "Authorization": f'Bearer {os.environ["NILLION_NILAI_KEY"]}',
-            "accept": "application/json",
-            "Content-Type": "application/json",
-        },
-        timeout=3600,
-        json={
-            "model": probe_model_name(os.environ["NILLION_NILAI_HOST"], model_role),
-            "messages": [
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": task},
-            ],
-            "temperature": 0.3,
-            "max_tokens": 2048,
-            "stream": False,
+    """Invoke SecretLLM with injected SecretVault plaintext values and save result to SecretVault."""
+    llm = ChatOpenAI(
+        openai_api_base=os.environ["NILLION_NILAI_HOST"],
+        openai_api_key=os.environ["NILLION_NILAI_KEY"],
+        model_name=probe_model_name(os.environ["NILLION_NILAI_HOST"], model_role),
+        streaming=False,
+        extra_body={
             "secret_vault": {  # secure key migration
                 "org_did": os.environ["NILLION_ORG_ID"],
                 "secret_key": os.environ["NILLION_SECRET_KEY"],
@@ -177,30 +165,21 @@ def invoke_with_secret_vault_and_save(
             },
         },
     )
+    res = llm.invoke(task)
 
-    print(json.dumps(tester.json(), indent=4))
+    print(json.dumps(res.model_dump_json(), indent=4))
 
 
 def secret_vault_save(schema_uuid: str, task: str):
-    # Send POST request directly to nilai endpoint
-    chat_completions_url = os.environ["NILLION_NILAI_HOST"] + "/chat/completions"
-    tester = requests.post(
-        chat_completions_url,
-        headers={
-            "Authorization": f'Bearer {os.environ["NILLION_NILAI_KEY"]}',
-            "accept": "application/json",
-            "Content-Type": "application/json",
-        },
-        timeout=3600,
-        json={
-            "model": probe_model_name(os.environ["NILLION_NILAI_HOST"], "worker"),
-            "messages": [
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": task},
-            ],
-            "temperature": 0.3,
-            "max_tokens": 2048,
-            "stream": False,
+    """Invoke SecretLLM and save result to SecretVault."""
+    llm_tools = ChatOpenAI(
+        openai_api_base=os.environ["NILLION_NILAI_HOST"],
+        openai_api_key=os.environ["NILLION_NILAI_KEY"],
+        model_name=probe_model_name(os.environ["NILLION_NILAI_HOST"], "worker"),
+        temperature=0.3,
+        max_tokens=2048,
+        streaming=False,
+        extra_body={
             "secret_vault": {  # secure key migration
                 "org_did": os.environ["NILLION_ORG_ID"],
                 "secret_key": os.environ["NILLION_SECRET_KEY"],
@@ -208,32 +187,23 @@ def secret_vault_save(schema_uuid: str, task: str):
             },
         },
     )
+    res = llm_tools.invoke(task)
 
-    print(json.dumps(tester.json(), indent=4))
+    print(json.dumps(res.model_dump_json(), indent=4))
 
 
 def invoke_with_secret_vault(
     model_role: str, schema_uuid: str, task: str, query_filter: dict = {}
 ):
-    # Send POST request directly to nilai endpoint
-    chat_completions_url = os.environ["NILLION_NILAI_HOST"] + "/chat/completions"
-    tester = requests.post(
-        chat_completions_url,
-        headers={
-            "Authorization": f'Bearer {os.environ["NILLION_NILAI_KEY"]}',
-            "accept": "application/json",
-            "Content-Type": "application/json",
-        },
-        timeout=3600,
-        json={
-            "model": probe_model_name(os.environ["NILLION_NILAI_HOST"], model_role),
-            "messages": [
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": task},
-            ],
-            "temperature": 0.3,
-            "max_tokens": 2048,
-            "stream": False,
+    """Invoke SecretLLM with injected SecretVault plaintext values."""
+    llm_tools = ChatOpenAI(
+        openai_api_base=os.environ["NILLION_NILAI_HOST"],
+        openai_api_key=os.environ["NILLION_NILAI_KEY"],
+        model_name=probe_model_name(os.environ["NILLION_NILAI_HOST"], "worker"),
+        temperature=0.3,
+        max_tokens=2048,
+        streaming=False,
+        extra_body={
             "secret_vault": {  # secure key migration
                 "org_did": os.environ["NILLION_ORG_ID"],
                 "secret_key": os.environ["NILLION_SECRET_KEY"],
@@ -242,5 +212,6 @@ def invoke_with_secret_vault(
             },
         },
     )
+    res = llm_tools.invoke(task)
 
-    print(json.dumps(tester.json(), indent=4))
+    print(json.dumps(res.model_dump_json(), indent=4))
