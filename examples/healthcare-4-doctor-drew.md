@@ -32,8 +32,9 @@ sequenceDiagram
         Agent->>Server: Generate medical diagnosis w/ secretvault keys + schema def
 
         activate Server  
-            Note over Server: [worker]
+            Note over Server: [reasoning]
             Server->>Server: Perform inference
+            Note over Server: [worker]
             Server->>Server: Transform output to schema format
             Server->>nilDB: Save to SecureVault
             nilDB->>Server: Return ids
