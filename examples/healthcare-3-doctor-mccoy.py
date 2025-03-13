@@ -60,7 +60,7 @@ def main(case_file_path: str) -> bool:
 
     model_name = probe_model_name(os.environ["NILLION_NILAI_HOST"], "reasoning")
     TOOLS_TASK = f"""
-    You are a doctor named Doctor Feelgood working at the {model_name} institution.
+    You are a doctor named Doctor McCoy working at the {model_name} institution.
     You have already formed an expert opinion and formed a diagnosis of a patients
     condition. This is your DIAGNOSTIC REPORT and this report is found below.
 
